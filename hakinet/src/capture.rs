@@ -12,7 +12,7 @@ use pnet::packet::Packet;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use crate::output::OutputWriter;
-use crate::packet::PacketInfo;
+use hakinet_common::PacketInfo;
 
 pub struct PacketCapture {
     capture: Capture<Active>,

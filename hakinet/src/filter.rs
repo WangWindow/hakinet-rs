@@ -1,4 +1,4 @@
-use crate::packet::PacketInfo;
+use hakinet_common::PacketInfo;
 use anyhow::Result;
 
 pub struct PacketFilter {

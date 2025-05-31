@@ -1,0 +1,19 @@
+{
+  "hosts": [
+    {
+      "addr": "127.0.0.1",
+      "hostname": "127.0.0.1",
+      "is_up": true,
+      "ports": [],
+      "os_info": null,
+      "scan_time": 1748682405,
+      "response_time": null
+    }
+  ],
+  "start_time": 1748682405,
+  "end_time": 1748682405,
+  "total_hosts": 1,
+  "hosts_up": 1,
+  "total_ports_scanned": 0,
+  "open_ports_found": 0
+}

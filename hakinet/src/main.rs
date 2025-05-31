@@ -2,11 +2,11 @@ use anyhow::Result;
 use clap::{Parser, Subcommand};
 use colored::*;
 use log::info;
+use hakinet_common::{print_cat_banner, print_cat_working, print_cat_done};
 
 mod capture;
 mod filter;
 mod output;
-mod packet;
 
 use capture::PacketCapture;
 
@@ -47,50 +47,7 @@ enum Commands {
     Interfaces,
 }
 
-fn print_cat_banner() {
-    println!(
-        "{}",
-        "
-    ╭─────────────────────────────────────────╮
-    │                                         │
-    │        🐱 Welcome to Hakinet! 🐱        │
-    │     Your cute network sniffer cat       │
-    │                                         │
-    │      /\\_/\\    Meow! Let's catch some    │
-    │     ( o.o )   packets together! 📦      │
-    │      > ^ <                              │
-    │                                         │
-    ╰─────────────────────────────────────────╯
-    "
-        .bright_cyan()
-    );
-}
 
-fn print_cat_working() {
-    println!(
-        "{}",
-        "
-    🐱 Hakinet is hunting for packets...
-       /\\_/\\
-      ( ^.^ ) *sniff sniff*
-       > ^ <
-    "
-        .bright_green()
-    );
-}
-
-fn print_cat_done() {
-    println!(
-        "{}",
-        "
-    🐱 Packet hunting complete!
-       /\\_/\\
-      ( -.- ) *yawn*
-       > ^ <
-    "
-        .bright_yellow()
-    );
-}
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -101,7 +58,7 @@ async fn main() -> Result<()> {
         .filter_level(log::LevelFilter::Info)
         .init();
 
-    print_cat_banner();
+    print_cat_banner("Hakinet", "Your cute network sniffer cat");
 
     match cli.command {
         Commands::Capture {
@@ -118,7 +75,7 @@ async fn main() -> Result<()> {
             }
 
             info!("Starting packet capture on interface: {}", interface);
-            print_cat_working();
+            print_cat_working("Hakinet is hunting for packets...");
 
             let mut capture = PacketCapture::new(&interface)?;
 
@@ -129,7 +86,7 @@ async fn main() -> Result<()> {
 
             capture.start_capture(count, output).await?;
 
-            print_cat_done();
+            print_cat_done("Packet hunting complete!");
             println!("{}", "Thanks for using Hakinet! 🐾".bright_magenta());
         }
         Commands::Interfaces => {

@@ -1,0 +1,28 @@
+[package]
+name = "hakinet-scan"
+version = "0.1.0"
+edition = "2024"
+description = "A network scanning tool with nmap-like functionality and a cute cat mascot"
+authors = ["WangWindow <1598593280@qq.com>"]
+
+[lints]
+workspace = true
+
+[[bin]]
+name = "hakinet-scan"
+path = "src/main.rs"
+
+[dependencies]
+hakinet-common = { path = "../hakinet-common" }
+clap = { workspace = true }
+tokio = { workspace = true }
+anyhow = { workspace = true }
+log = { workspace = true }
+env_logger = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+colored = { workspace = true }
+socket2 = { workspace = true }
+rand = { workspace = true }
+dns-lookup = { workspace = true }
+pnet = { workspace = true }

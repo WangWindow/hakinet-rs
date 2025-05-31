@@ -1,23 +1,38 @@
-[package]
-name = "hakinet"
-version = "0.1.0"
-edition = "2024"
-description = "A command-line network packet capture tool with a cute cat mascot"
-authors = ["WangWindow <1598593280@qq.com>"]
+[workspace]
+members = [
+    "hakinet",
+    "hakinet-scan",
+    "hakinet-common"
+]
+resolver = "2"
 
-[[bin]]
-name = "hakinet"
-path = "src/main.rs"
+[workspace.lints.rust]
+dead_code = "allow"
+#unused_imports = "allow"
+#unused_variables = "allow"
+#unused_mut = "allow"
 
-[dependencies]
+[workspace.dependencies]
 clap = { version = "4.0", features = ["derive"] }
 tokio = { version = "1.0", features = ["full"] }
-pcap = "2.0"
-pnet = "0.35"
+anyhow = "1.0"
+log = "0.4"
+env_logger = "0.11"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 chrono = { version = "0.4", features = ["serde"] }
 colored = "3.0"
-anyhow = "1.0"
-log = "0.4"
-env_logger = "0.11"
+
+# Networking dependencies
+pcap = "2.0"
+pnet = "0.35"
+socket2 = "0.5"
+rand = "0.9"
+dns-lookup = "2.0"
+libc = "0.2"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"

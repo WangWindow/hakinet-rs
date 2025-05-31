@@ -1,34 +1,33 @@
-# 🐱 Hakinet - 网络抓包工具
+# 🐱 Hakinet Network Tools Suite
 
-一个可爱的命令行网络数据包捕获工具，以小猫为吉祥物！
+A comprehensive network toolkit with cute cat mascots! This workspace contains multiple network tools for packet capture, port scanning, and host discovery.
 
 ```
     ╭─────────────────────────────────────────╮
     │                                         │
     │        🐱 Welcome to Hakinet! 🐱        │
-    │     Your cute network sniffer cat       │
+    │     Your cute network toolkit cats      │
     │                                         │
-    │      /\_/\    Meow! Let's catch some    │
-    │     ( o.o )   packets together! 📦      │
+    │      /\_/\    Meow! Let's hunt some     │
+    │     ( o.o )   network packets! 📦       │
     │      > ^ <                              │
     │                                         │
     ╰─────────────────────────────────────────╯
 ```
 
-## 特性
+## 🚀 Tools Overview
 
-- 🔍 实时网络数据包捕获
-- 🌈 彩色终端输出
-- 📁 JSON 格式输出文件
-- 🔧 BPF 过滤器支持
-- 🖥️ 多网络接口支持
-- 🐱 可爱的小猫界面
+This workspace contains three main tools:
 
-## 安装
+- **🔍 hakinet** - Network packet capture tool (like tcpdump/Wireshark)
+- **🎯 hakinet-scan** - Network scanning tool (like nmap)
+- **📚 hakinet-common** - Shared library for common functionality
 
-### 前置要求
+## 📦 Installation
 
-在 Linux 系统上，您需要安装 libpcap 开发库：
+### Prerequisites
+
+On Linux systems, you need to install libpcap development libraries:
 
 ```bash
 # Ubuntu/Debian
@@ -36,173 +35,317 @@ sudo apt-get install libpcap-dev
 
 # CentOS/RHEL/Fedora
 sudo yum install libpcap-devel
-# 或者对于较新的系统
+# Or for newer systems
 sudo dnf install libpcap-devel
 
 # Arch Linux
 sudo pacman -S libpcap
 ```
 
-### 编译安装
+### Build and Install
 
 ```bash
-# 克隆项目
+# Clone the project
 git clone <repository-url>
 cd hakinet-rs
 
-# 编译
+# Build all tools
 cargo build --release
 
-# 安装到系统路径（可选）
-cargo install --path .
+# Install all tools to system path (optional)
+cargo install --path hakinet
+cargo install --path hakinet-scan
 ```
 
-## 使用方法
+## 🔍 Hakinet - Packet Capture Tool
 
-### 基本用法
+### Features
+
+- 🔍 Real-time network packet capture
+- 🌈 Colorful terminal output
+- 📁 JSON format output files
+- 🔧 BPF filter support
+- 🖥️ Multiple network interface support
+- 🐱 Cute cat interface
+
+### Usage
 
 ```bash
-# 查看帮助
+# Show help
 hakinet --help
 
-# 列出可用的网络接口
+# List available network interfaces
 hakinet interfaces
 
-# 开始捕获数据包（默认接口，无限制）
+# Start capturing packets (default interface, unlimited)
 sudo hakinet capture
 
-# 捕获指定数量的数据包
+# Capture specific number of packets
 sudo hakinet capture --count 100
 
-# 在指定接口上捕获
+# Capture on specific interface
 sudo hakinet capture --interface eth0
 
-# 使用过滤器（只捕获 HTTP 流量）
+# Use filter (HTTP traffic only)
 sudo hakinet capture --filter "tcp port 80"
 
-# 保存到文件
+# Save to file
 sudo hakinet capture --output packets.json
 
-# 详细输出
+# Verbose output
 sudo hakinet capture --verbose
 ```
 
-### 过滤器示例
-
-Hakinet 支持标准的 BPF (Berkeley Packet Filter) 语法：
+### Filter Examples
 
 ```bash
-# 捕获特定主机的流量
+# Capture traffic from specific host
 sudo hakinet capture --filter "host 192.168.1.1"
 
-# 捕获 TCP 流量
+# Capture TCP traffic
 sudo hakinet capture --filter "tcp"
 
-# 捕获特定端口
+# Capture specific port
 sudo hakinet capture --filter "port 443"
 
-# 捕获 HTTP 和 HTTPS 流量
+# Capture HTTP and HTTPS traffic
 sudo hakinet capture --filter "tcp port 80 or tcp port 443"
 
-# 捕获 DNS 查询
+# Capture DNS queries
 sudo hakinet capture --filter "udp port 53"
 
-# 排除特定流量
+# Exclude specific traffic
 sudo hakinet capture --filter "not host 192.168.1.1"
 ```
 
-### 输出格式
+## 🎯 Hakinet-Scan - Network Scanner
 
-终端输出示例：
-```
-🔍 Capturing packets on interface: eth0
-📊 Capturing unlimited packets (Ctrl+C to stop)
+### Features
 
-[1] 14:30:15      TCP    74 bytes 192.168.1.100:54321 → 142.250.185.142:443
-[2] 14:30:15      UDP    53 bytes 192.168.1.100:12345 → 8.8.8.8:53
-[3] 14:30:15     ICMP    84 bytes 192.168.1.1 → 8.8.8.8 Type: 8, Code: 0
-```
+- 🎯 Port scanning (TCP SYN, Connect, UDP)
+- 🌐 Host discovery (Ping, TCP SYN, ARP)
+- 🔍 Service detection and version identification
+- 📊 Multiple output formats (Human, JSON, XML, CSV)
+- ⚡ Parallel scanning for speed
+- 🎲 Randomized scan order option
+- 🐱 Cute cat progress indicators
 
-JSON 输出格式：
-```json
-[
-  {
-    "timestamp": 1684567815,
-    "length": 74,
-    "protocol": "TCP",
-    "src_addr": "192.168.1.100",
-    "dst_addr": "142.250.185.142",
-    "src_port": 54321,
-    "dst_port": 443,
-    "info": "Flags: 24"
-  }
-]
-```
-
-## 权限要求
-
-由于网络数据包捕获需要访问原始套接字，通常需要管理员权限：
+### Port Scanning
 
 ```bash
-# 使用 sudo 运行
+# Basic port scan
+hakinet-scan scan 192.168.1.1
+
+# Scan multiple hosts
+hakinet-scan scan 192.168.1.1 192.168.1.100 example.com
+
+# Scan CIDR range
+hakinet-scan scan 192.168.1.0/24
+
+# Scan IP range
+hakinet-scan scan 192.168.1.1-192.168.1.50
+
+# Specify ports
+hakinet-scan scan 192.168.1.1 --ports 80,443,8080
+hakinet-scan scan 192.168.1.1 --ports 1-1000
+hakinet-scan scan 192.168.1.1 --ports 80-443
+
+# Different scan types
+hakinet-scan scan 192.168.1.1 --scan-type syn       # TCP SYN scan (default)
+hakinet-scan scan 192.168.1.1 --scan-type connect   # TCP connect scan
+hakinet-scan scan 192.168.1.1 --scan-type udp       # UDP scan
+hakinet-scan scan 192.168.1.1 --scan-type comprehensive # TCP + UDP
+
+# Advanced options
+hakinet-scan scan 192.168.1.1 --service-detection   # Detect services
+hakinet-scan scan 192.168.1.1 --os-detection        # OS fingerprinting
+hakinet-scan scan 192.168.1.1 --randomize           # Randomize scan order
+hakinet-scan scan 192.168.1.1 --max-parallel 200    # Increase parallelism
+hakinet-scan scan 192.168.1.1 --timeout 5           # Set timeout
+
+# Output formats
+hakinet-scan scan 192.168.1.1 --output json --file results.json
+hakinet-scan scan 192.168.1.1 --output xml --file results.xml
+hakinet-scan scan 192.168.1.1 --output csv --file results.csv
+```
+
+### Host Discovery
+
+```bash
+# Ping discovery
+hakinet-scan discovery 192.168.1.0/24
+
+# TCP SYN discovery
+hakinet-scan discovery 192.168.1.0/24 --method tcp-syn
+
+# ARP discovery (local network only)
+hakinet-scan discovery 192.168.1.0/24 --method arp
+
+# Advanced discovery options
+hakinet-scan discovery 192.168.1.0/24 --max-parallel 100 --timeout 3
+```
+
+### Output Examples
+
+Human-readable output:
+```
+🎯 Scan Results Summary
+Duration: 15 seconds
+Total hosts: 254
+Hosts up: 12
+Total ports scanned: 1000
+Open ports found: 45
+
+📡 Host: example.com (93.184.216.34)
+Response time: 125ms
+Open ports (3):
+  • 80/tcp open (http)
+  • 443/tcp open (https)
+  • 22/tcp open (ssh OpenSSH 8.0)
+```
+
+## 📚 Hakinet-Common Library
+
+The shared library provides common functionality:
+
+- 🌐 Network utilities (IP parsing, port ranges, CIDR handling)
+- 📊 Data types (packet info, scan results, host info)
+- 📄 Output formatting (JSON, XML, CSV, human-readable)
+- 🛠️ Utility functions (timing, rate limiting, formatting)
+- 🐱 Shared cat animations and UI elements
+
+## 🔧 Workspace Structure
+
+```
+hakinet-rs/
+├── Cargo.toml                 # Workspace root
+├── hakinet/                   # Packet capture tool
+│   ├── Cargo.toml
+│   └── src/
+│       ├── main.rs
+│       ├── capture.rs
+│       ├── filter.rs
+│       └── output.rs
+├── hakinet-scan/              # Network scanner tool
+│   ├── Cargo.toml
+│   └── src/
+│       ├── main.rs
+│       ├── scanner.rs
+│       ├── discovery.rs
+│       └── service.rs
+└── hakinet-common/            # Shared library
+    ├── Cargo.toml
+    └── src/
+        ├── lib.rs
+        ├── network.rs
+        ├── types.rs
+        ├── output.rs
+        └── utils.rs
+```
+
+## 🔐 Permissions
+
+Both tools require elevated privileges for raw socket access:
+
+```bash
+# Run with sudo
 sudo hakinet capture
+sudo hakinet-scan scan 192.168.1.1
 
-# 或者给二进制文件设置特殊权限（Linux）
+# Or set capabilities (Linux only)
 sudo setcap cap_net_raw,cap_net_admin=eip ./target/release/hakinet
+sudo setcap cap_net_raw,cap_net_admin=eip ./target/release/hakinet-scan
 ```
 
-## 开发
+## 🧪 Development
 
-### 项目结构
-
-```
-src/
-├── main.rs      # 主程序和命令行界面
-├── capture.rs   # 数据包捕获逻辑
-├── packet.rs    # 数据包信息结构
-├── filter.rs    # 过滤器相关功能
-└── output.rs    # 输出处理
-```
-
-### 运行测试
+### Build and Test
 
 ```bash
+# Build entire workspace
+cargo build
+
+# Build specific tool
+cargo build -p hakinet
+cargo build -p hakinet-scan
+
+# Run tests
 cargo test
+
+# Development run
+cargo run -p hakinet -- capture --help
+cargo run -p hakinet-scan -- scan --help
 ```
 
-### 开发模式运行
+### Adding New Features
 
-```bash
-cargo run -- capture --help
-```
+The modular workspace structure makes it easy to:
+- Add new scanning techniques to `hakinet-scan`
+- Extend packet analysis in `hakinet`
+- Share common functionality via `hakinet-common`
+- Create new tools that leverage existing components
 
-## 协议支持
+## 📋 Protocol Support
 
-目前支持的协议：
+### Packet Capture
 - ✅ Ethernet
-- ✅ IPv4
-- ✅ IPv6
-- ✅ TCP
-- ✅ UDP
+- ✅ IPv4/IPv6
+- ✅ TCP/UDP
 - ✅ ICMP
 - ✅ ARP
 
-## 贡献
+### Port Scanning
+- ✅ TCP SYN scan
+- ✅ TCP connect scan
+- ✅ UDP scan
+- ✅ Service detection
+- ⚠️ OS fingerprinting (basic)
 
-欢迎提交 Issue 和 Pull Request！
+### Service Detection
+- ✅ HTTP/HTTPS
+- ✅ SSH
+- ✅ FTP
+- ✅ SMTP
+- ✅ DNS
+- ✅ MySQL
+- ✅ PostgreSQL
+- ✅ And more...
 
-## 许可证
+## 🤝 Contributing
 
-本项目采用 MIT 许可证。
+We welcome contributions! Please feel free to submit issues and pull requests.
 
-## 小猫说
+### Guidelines
+- Follow Rust best practices
+- Add tests for new functionality
+- Update documentation
+- Maintain the cute cat theme! 🐱
+
+## 📜 License
+
+This project is licensed under the MIT License.
+
+## 🐱 Cat Says
 
 ```
    /\_/\
-  ( ^.^ ) "感谢使用 Hakinet！记住要负责任地使用网络工具喵！"
+  ( ^.^ ) "Thanks for using Hakinet! Remember to use these tools responsibly, meow!"
    > ^ <
 ```
 
 ---
 
-**注意**: 请确保您有权在目标网络上进行数据包捕获，并遵守相关法律法规。
+**⚠️ Important**: Please ensure you have permission to scan target networks and comply with all applicable laws and regulations. These tools should only be used on networks you own or have explicit permission to test.
+
+## 🔗 Comparison with Popular Tools
+
+| Feature | Hakinet | hakinet-scan | tcpdump | nmap | Wireshark |
+|---------|---------|--------------|---------|------|-----------|
+| Packet Capture | ✅ | ❌ | ✅ | ❌ | ✅ |
+| Port Scanning | ❌ | ✅ | ❌ | ✅ | ❌ |
+| Service Detection | ❌ | ✅ | ❌ | ✅ | ❌ |
+| Host Discovery | ❌ | ✅ | ❌ | ✅ | ❌ |
+| Cute Cats | 🐱 | 🐱 | ❌ | ❌ | ❌ |
+| JSON Output | ✅ | ✅ | ❌ | ❌ | ❌ |
+| Colorful CLI | ✅ | ✅ | ❌ | ❌ | N/A |
+| Cross-platform | ✅ | ✅ | ✅ | ✅ | ✅ |

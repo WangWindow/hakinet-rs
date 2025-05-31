@@ -4,7 +4,7 @@ use serde_json;
 use tokio::fs::OpenOptions;
 use tokio::io::{AsyncWriteExt, BufWriter};
 
-use crate::packet::PacketInfo;
+use hakinet_common::PacketInfo;
 
 pub struct OutputWriter {
     writer: Option<BufWriter<tokio::fs::File>>,

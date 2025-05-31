@@ -1,0 +1,26 @@
+[package]
+name = "hakinet-common"
+version = "0.1.0"
+edition = "2024"
+description = "Common utilities and types for the Hakinet network tools suite"
+authors = ["WangWindow <1598593280@qq.com>"]
+
+[lints]
+workspace = true
+
+[lib]
+name = "hakinet_common"
+path = "src/lib.rs"
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+chrono = { workspace = true }
+anyhow = { workspace = true }
+log = { workspace = true }
+colored = { workspace = true }
+tokio = { workspace = true }
+pnet = { workspace = true }
+rand = { workspace = true }
+dns-lookup = { workspace = true }
+libc = { workspace = true }
