@@ -16,17 +16,29 @@ use colored::*;
 pub fn print_cat_banner(tool_name: &str, description: &str) {
     // Define all the content lines
     let title_line = format!("🐱 Welcome to {}! 🐱", tool_name);
-    let cat_line = "/\\_/\\    Meow! Let's hunt some";
-    let packet_line = "( o.o )   network packets! 📦";
-    let face_line = "> ^ <";
+    let cat_line = "    /\\_/\\    Meow! Let's hunt some    ";
+    let packet_line = "  ( o.o )   network packets! 📦     ";
+    let face_line = "    > ^ <     packets together!      ";
 
-    // Find the maximum width needed (accounting for emoji width issues)
+    // Calculate display width accounting for emoji visual width
+    let calculate_display_width = |s: &str| -> usize {
+        s.chars().map(|c| {
+            match c {
+                // Common emoji characters take up 2 visual columns
+                '🐱' | '📦' => 2,
+                // Most other characters take 1 column
+                _ => 1,
+            }
+        }).sum()
+    };
+
+    // Find the maximum display width needed
     let max_content_width = [
-        title_line.chars().count(),  // Use chars().count() for proper Unicode width
-        description.chars().count(),
-        cat_line.chars().count(),
-        packet_line.chars().count(),
-        face_line.chars().count(),
+        calculate_display_width(&title_line),
+        calculate_display_width(description),
+        calculate_display_width(cat_line),
+        calculate_display_width(packet_line),
+        calculate_display_width(face_line),
     ].into_iter().max().unwrap_or(40);
 
     // Ensure minimum width and add padding
@@ -38,11 +50,11 @@ pub fn print_cat_banner(tool_name: &str, description: &str) {
 
     // Helper function to center text in the banner
     let center_text = |text: &str| -> String {
-        let text_width = text.chars().count();
-        if text_width >= banner_width - 2 {
+        let text_display_width = calculate_display_width(text);
+        if text_display_width >= banner_width - 2 {
             format!("│{}│", text)
         } else {
-            let padding = banner_width - 2 - text_width;
+            let padding = banner_width - 2 - text_display_width;
             let left_pad = padding / 2;
             let right_pad = padding - left_pad;
             format!("│{}{text}{}│", " ".repeat(left_pad), " ".repeat(right_pad))
