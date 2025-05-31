@@ -1,0 +1,236 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+      release_id: ${{ steps.create_release.outputs.id }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Get version from tag
+      id: get_version
+      run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Hakinet ${{ steps.get_version.outputs.VERSION }}
+        body: |
+          ## 🐱 Hakinet Network Tools Suite - ${{ steps.get_version.outputs.VERSION }}
+
+          A comprehensive network toolkit with cute cat mascots!
+
+          ### 📦 Downloads
+          - **Linux (x86_64)**: hakinet-linux-x86_64.tar.gz
+          - **Windows (x86_64)**: hakinet-windows-x86_64.zip
+
+          ### 🚀 Tools Included
+          - **🔍 hakinet** - Network packet capture tool (like tcpdump/Wireshark)
+          - **🎯 hakinet-scan** - Network scanning tool (like nmap)
+
+          ### 📋 Installation
+
+          #### Linux
+          ```bash
+          tar -xzf hakinet-linux-x86_64.tar.gz
+          sudo cp hakinet hakinet-scan /usr/local/bin/
+          sudo setcap cap_net_raw,cap_net_admin=eip /usr/local/bin/hakinet
+          sudo setcap cap_net_raw,cap_net_admin=eip /usr/local/bin/hakinet-scan
+          ```
+
+          #### Windows
+          1. Extract hakinet-windows-x86_64.zip
+          2. Install [Npcap](https://nmap.org/npcap/) for packet capture functionality
+          3. Run tools as Administrator
+
+          ### 🔧 Quick Start
+          ```bash
+          # List network interfaces
+          hakinet interfaces
+
+          # Start packet capture
+          sudo hakinet capture
+
+          # Scan local network
+          hakinet-scan discovery 192.168.1.0/24
+
+          # Port scan
+          hakinet-scan scan example.com
+          ```
+
+          ### ⚠️ Important
+          Please ensure you have permission to scan target networks and comply with all applicable laws and regulations.
+
+          ---
+          ```
+             /\_/\
+            ( ^.^ ) "Thanks for using Hakinet! Meow!"
+             > ^ <
+          ```
+        draft: false
+        prerelease: false
+
+  build-release:
+    name: Build Release ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+    needs: create-release
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+            name: hakinet-linux-x86_64
+            archive: tar.gz
+          - target: x86_64-pc-windows-msvc
+            os: windows-latest
+            name: hakinet-windows-x86_64
+            archive: zip
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install system dependencies (Linux)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libpcap-dev pkg-config
+
+    - name: Install WinPcap development libraries (Windows)
+      if: matrix.os == 'windows-latest'
+      shell: pwsh
+      run: |
+        Invoke-WebRequest -Uri "https://www.winpcap.org/install/bin/WpdPack_4_1_2.zip" -OutFile "WpdPack.zip"
+        Expand-Archive -Path "WpdPack.zip" -DestinationPath "C:\"
+        echo "LIB=C:\WpdPack\Lib\x64;C:\WpdPack\Lib" >> $env:GITHUB_ENV
+        echo "LIBPCAP_LIBDIR=C:\WpdPack\Lib\x64" >> $env:GITHUB_ENV
+        echo "LIBPCAP_INCLUDEDIR=C:\WpdPack\Include" >> $env:GITHUB_ENV
+
+    - name: Install Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        profile: minimal
+        override: true
+        target: ${{ matrix.target }}
+
+    - name: Cache cargo
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          target
+        key: ${{ runner.os }}-cargo-release-${{ hashFiles('**/Cargo.lock') }}
+
+    - name: Build release binaries
+      run: cargo build --release --target ${{ matrix.target }}
+
+    - name: Strip binaries (Linux)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        strip target/${{ matrix.target }}/release/hakinet
+        strip target/${{ matrix.target }}/release/hakinet-scan
+
+    - name: Create release package (Linux)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        mkdir -p package
+        cp target/${{ matrix.target }}/release/hakinet package/
+        cp target/${{ matrix.target }}/release/hakinet-scan package/
+        cp README.md package/ 2>/dev/null || true
+
+        # Create installation script
+        cat > package/install.sh << 'EOF'
+        #!/bin/bash
+        echo "🐱 Installing Hakinet tools..."
+
+        # Check if running as root
+        if [[ $EUID -eq 0 ]]; then
+            cp hakinet hakinet-scan /usr/local/bin/
+            setcap cap_net_raw,cap_net_admin=eip /usr/local/bin/hakinet
+            setcap cap_net_raw,cap_net_admin=eip /usr/local/bin/hakinet-scan
+            echo "✅ Installed to /usr/local/bin/"
+            echo "🔧 Capabilities set for raw socket access"
+        else
+            echo "⚠️  Please run as root (sudo) to install system-wide"
+            echo "📁 Or copy binaries to your preferred location manually"
+        fi
+
+        echo ""
+        echo "🚀 Quick start:"
+        echo "  hakinet interfaces          # List network interfaces"
+        echo "  sudo hakinet capture        # Start packet capture"
+        echo "  hakinet-scan discovery IP   # Network discovery"
+        echo "  hakinet-scan scan HOST      # Port scanning"
+        EOF
+        chmod +x package/install.sh
+
+        tar -czf ${{ matrix.name }}.${{ matrix.archive }} -C package .
+
+    - name: Create release package (Windows)
+      if: matrix.os == 'windows-latest'
+      shell: pwsh
+      run: |
+        New-Item -ItemType Directory -Force -Path package
+
+        Copy-Item "target\${{ matrix.target }}\release\hakinet.exe" "package\"
+        Copy-Item "target\${{ matrix.target }}\release\hakinet-scan.exe" "package\"
+        Copy-Item "README.md" "package\" -ErrorAction SilentlyContinue
+
+        # Create installation notes
+        @"
+        🐱 Hakinet Network Tools Suite - Windows Installation
+
+        📋 Prerequisites:
+        1. Install Npcap from: https://nmap.org/npcap/
+           (Required for packet capture functionality)
+
+        🔧 Installation:
+        1. Extract all files to a folder (e.g., C:\hakinet\)
+        2. Add the folder to your system PATH:
+           - Open System Properties > Environment Variables
+           - Edit the PATH variable
+           - Add your hakinet folder path
+
+        🚀 Usage:
+        - Open Command Prompt or PowerShell as Administrator
+        - Run: hakinet interfaces
+        - Run: hakinet capture
+        - Run: hakinet-scan discovery 192.168.1.0/24
+        - Run: hakinet-scan scan example.com
+
+        ⚠️  Important: Always run as Administrator for network operations
+
+        For more information, see README.md
+        "@ | Out-File -FilePath "package\INSTALL.txt" -Encoding UTF8
+
+        Compress-Archive -Path "package\*" -DestinationPath "${{ matrix.name }}.${{ matrix.archive }}"
+
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.create-release.outputs.upload_url }}
+        asset_path: ./${{ matrix.name }}.${{ matrix.archive }}
+        asset_name: ${{ matrix.name }}.${{ matrix.archive }}
+        asset_content_type: ${{ matrix.archive == 'zip' && 'application/zip' || 'application/gzip' }}
